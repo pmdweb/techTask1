@@ -1,0 +1,29 @@
+{
+	"functions": {
+	  "api/*.js": {
+		"runtime": "nodejs16",
+		"memory": 512
+	  }
+	},
+	"routes": [
+	  { "src": "/api/(.*)", "dest": "/api/$1" },
+	  { "src": "/(.*)", "dest": "/index.html" }
+	],
+	"builds": [
+	  {
+		"src": "api/**/*.js",
+		"use": "@vercel/node"
+	  },
+	  {
+		"src": "src/index.html",
+		"use": "@vercel/static"
+	  },
+	  {
+		"src": "src/**/*.{js,jsx,ts,tsx}",
+		"use": "@vercel/static",
+		"config": {
+		  "zeroConfig": true
+		}
+	  }
+	]
+  }
