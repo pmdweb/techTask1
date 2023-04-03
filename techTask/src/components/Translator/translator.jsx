@@ -9,26 +9,38 @@ import {
 	Typography,
 	Button
 } from '@mui/material'
-import { getLanguages } from '../../services/gtApi'
+import { detectLanguage, getLanguages, translateText } from '../../services/gtApi'
 export default function Translator() {
 
-	const [targetLanguage, setTargetLanguage] = useState(['en'])
+	const [targetLanguage, setTargetLanguage] = useState('en')
 	const [languageList, setLanguageList] = useState([])
-	const [translated, setTranslated] = useState('teste')
-	const Origin = 'pt-br'
+	const [translated, setTranslated] = useState('')
+	const [text,setText] = useState('')
+	const [origin,setOrigin] = useState('en')
 
 	const handleTargetLanguage = async (event) => {
-		setTargetLanguage(event.target.value)
+		try {
+			setTargetLanguage(event.target.value)
+		} catch (error) {
+			console.log(error)
+		}
 	};
 
 	const handleTranslated = async (event) => {
-		setTranslated(event.target.value)
+		try {
+			//console.log(event.target)
+			const result = await detectLanguage(text)
+			setTranslated(await translateText(text,targetLanguage))
+			setOrigin(result.language.toUpperCase())
+		} catch (error) {
+			console.log(error)
+		}
 	};
 
 	useEffect(() => {
 		async function fetchData() {
 			try {
-				setLanguageList(await getLanguages(targetLanguage))
+				setLanguageList(await getLanguages())
 			} catch (error) {
 				console.log(error)
 			}
@@ -58,16 +70,18 @@ export default function Translator() {
 											> {list.name} </MenuItem>
 										)
 									})
-								) : (<p>Loading...</p>)
+								) : (<MenuItem id={0} key={0} value={en} selected > Loading... </MenuItem>)
 							}
 						</Select>
 					</Grid>
 					<Grid item xs={3}>
 						<TextField
 							fullWidth
-							label={'Text to be translated'}
+							label={'Please insert an text to be translated here...'}
 							multiline
 							rows={4}
+							value={text}
+  							onChange={(event) => setText(event.target.value)}
 						/>
 					</Grid>
 					<Grid item xs={3}></Grid>
@@ -90,16 +104,16 @@ export default function Translator() {
 					<Grid item xs={6}>
 						<Button variant="contained" onClick={handleTranslated} fullWidth>Translate</Button>
 					</Grid>
-					<Grid item xs={6}>
-						<Typography>Origin Language: {Origin}</Typography>
+					<Grid item xs={3}></Grid>
+					<Grid item xs={3}></Grid>
+					<Grid item xs={3}>
+						<Typography>Origin Language: {origin.toLocaleUpperCase()}</Typography>
 					</Grid>
-					<Grid item xs={6}>
-						<Typography>Target Language: {targetLanguage}</Typography>
+					<Grid item xs={3}>
+						<Typography>Target Language: {targetLanguage.toLocaleUpperCase()}</Typography>
 					</Grid>
 				</Grid>
 			</Grid>
-
 		</Container>
-
 	)
 }
